@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# This library is written by Juhani "nortti" Haverinen. Version 1
+# This library is written by Juhani "nortti" Haverinen. Version 2
 # It defines a framebuffer object for more convenient usage of an LCD screen
 
 # This is free and unencumbered software released into the public domain.
@@ -33,6 +33,7 @@
 import lm1125_charset
 
 import sys
+import copy
 
 if sys.version_info.major < 3:
 	as_integer = ord
@@ -50,6 +51,9 @@ class LCD_framebuffer:
 		self.height = height
 		self.cursor_row = 0
 		self.cursor_column = 0
+
+		self.framebuffer = None
+		self.old_framebuffer = None
 		
 		self.clear_screen()
 		self.sync()
@@ -60,7 +64,9 @@ class LCD_framebuffer:
 	def sync(self):
 		# Iterate through every line and print to screen
 		for row in range(self.height):
-			self.lcd_write(to_bytestring(self.framebuffer[row]), row)
+			if not self.old_framebuffer or self.framebuffer[row] != self.old_framebuffer[row]:
+				self.lcd_write(to_bytestring(self.framebuffer[row]), row)
+		self.old_framebuffer = copy.deepcopy(self.framebuffer)
 
 	def dimensions(self):
 		return (self.width, self.height)
